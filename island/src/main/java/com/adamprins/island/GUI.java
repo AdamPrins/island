@@ -15,8 +15,8 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.1.0 
- * 		Initial Build
+ * @version 0.2.0 
+ * 		Added more toggle visibility buttons
  *		
  */
 public class GUI implements ActionListener {
@@ -31,7 +31,10 @@ public class GUI implements ActionListener {
     
     /* The JButtons */
     private JButton newPointButton;
-    private JButton circleVisabilityToggle;
+    private JToggleButton triangleVisabilityToggle;
+    private JToggleButton pointVisabilityToggle;
+    private JToggleButton circleVisabilityToggle;
+    
     
     /* The canvas where the drawing is performed */
     private Canvas canvas;
@@ -40,7 +43,6 @@ public class GUI implements ActionListener {
     private static final int CANVASE_SIZE = 10;
     
     private ArrayList<Triangle> triangles;
-    private ArrayList<Point> points;
     
     /**
      * Constructor of the GUI 
@@ -48,7 +50,7 @@ public class GUI implements ActionListener {
      * Sets all listeners
      */
 	public GUI() {
-		JFrame frame = new JFrame("JumpIN"); 
+		JFrame frame = new JFrame("island"); 
 	    Container contentPane = frame.getContentPane(); 
 	    contentPane.setLayout(new GridBagLayout());
 	    // get the content pane so we can put stuff in
@@ -102,7 +104,7 @@ public class GUI implements ActionListener {
 	    GridBagConstraints c = new GridBagConstraints();
 	    c.gridx=0;					c.gridy=0;
 		c.gridwidth=1;				c.gridheight=CANVASE_SIZE;
-	    c.ipadx = 100; 				c.ipady = CANVASE_SIZE;	//c.ipadx fully controls the space between the left and the canvas
+	    c.ipadx = 20; 				c.ipady = CANVASE_SIZE;	//c.ipadx fully controls the space between the left and the canvas
 	    c.weightx=1;
 	    contentPane.add(Box.createGlue(),c);
 	    
@@ -143,9 +145,22 @@ public class GUI implements ActionListener {
 	    c.gridx = 0;			c.gridy = 3;
 	    interfacePanel.add(newPointButton,c);
 	    
-	    circleVisabilityToggle = new JButton("Circle Visibility");
+	    pointVisabilityToggle = new JToggleButton("Points");
+	    pointVisabilityToggle.addActionListener(this);
+	    pointVisabilityToggle.setSelected(true);
+	    c.gridx = 0;			c.gridy = 4;
+	    interfacePanel.add(pointVisabilityToggle,c);
+	    
+	    triangleVisabilityToggle = new JToggleButton("Triangles");
+	    triangleVisabilityToggle.addActionListener(this);
+	    triangleVisabilityToggle.setSelected(true);
+	    c.gridx = 1;			c.gridy = 4;
+	    interfacePanel.add(triangleVisabilityToggle,c);
+	    
+	    circleVisabilityToggle = new JToggleButton("Circles");
 	    circleVisabilityToggle.addActionListener(this);
-	    c.gridx = 1;			c.gridy = 3;
+	    circleVisabilityToggle.setSelected(false);
+	    c.gridx = 2;			c.gridy = 4;
 	    interfacePanel.add(circleVisabilityToggle,c);
 	    
 	    outputStatic = new JLabel("Output: ");
@@ -180,7 +195,13 @@ public class GUI implements ActionListener {
         	JButton button = (JButton) o;
         	 actionOnJButton(button);
         }
-        else if (o instanceof JMenuItem){ // it's a JMenuItem
+        // see if it's a JToggleButton
+        else if (o instanceof JToggleButton) {
+        	JToggleButton button = (JToggleButton) o;
+        	 actionOnJToggleButton(button);
+        }
+        // see if its a JMenuItem
+        else if (o instanceof JMenuItem){
             JMenuItem item = (JMenuItem)o;
             actionOnJMenu(item);
         }
@@ -197,6 +218,22 @@ public class GUI implements ActionListener {
 			Point newPoint = Generate.point();
 			triangles = Generate.triangulation(triangles, newPoint);
 			canvas.setArray(triangles);
+			canvas.repaint();
+		}
+	}
+	
+	/**
+     * This method handles the pressing of a JToggleButton
+     * 
+     * @param button the button that was pressed
+     */
+	private void actionOnJToggleButton(JToggleButton button) {
+		if (button == pointVisabilityToggle) {
+			canvas.togglePaintPointBool();
+			canvas.repaint();
+		}
+		else if (button == triangleVisabilityToggle) {
+			canvas.togglePaintTriangleBool();
 			canvas.repaint();
 		}
 		else if (button == circleVisabilityToggle) {

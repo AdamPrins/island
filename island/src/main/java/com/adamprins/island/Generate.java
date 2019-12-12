@@ -13,12 +13,16 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.1.0 
- * 		Initial Build
+ * @version 0.2.0 
+ * 		abstracted canvas boundaries into static final fields
+ * 		Added functionality for calculating triangle colours
+ * 		Added additional comments
  *		
  */
 public class Generate {
-
+	
+	public static final int CANVAS_BOUNDARIES = 10;
+	public static final double CANVAS_SCALE = (Canvas.DRAWING_SIZE-2*CANVAS_BOUNDARIES) / (double)Canvas.DRAWING_SIZE;
 	
 	/**
 	 * Creates an ArrayList of n random points, that are somewhere on the canvas
@@ -41,8 +45,8 @@ public class Generate {
 	 * @return a new random Point
 	 */
 	public static Point point() {
-		int x = (int) (Math.random() * Canvas.DRAWING_SIZE * 0.8 + 50);
-		int y = (int) (Math.random() * Canvas.DRAWING_SIZE * 0.8 + 50);
+		int x = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+		int y = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
 		return new Point(x,y);
 	}
 	
@@ -95,12 +99,14 @@ public class Generate {
 				}
 			}
 		}
+		//Adds new triangles created from remaining polygon edges to the new point
 		for (Line newTriEdge:badEdges) {
 			ArrayList<Point> newTri = newTriEdge.getPoints();
 			newTri.add(point);
 			triangles.add(new Triangle(newTri));
 		}
 		
+		Triangle.calculateColors(triangles);
 		return triangles;
 	}
 	
@@ -134,6 +140,10 @@ public class Generate {
 		return new Circle(x,y,r);
 	}
 	
+	/**
+	 * 
+	 * @return a base triangle that encompasses the entire canvas
+	 */
 	public static Triangle baseTriangle() {
 		ArrayList<Point> baseTriangle = new ArrayList<Point>();
 		baseTriangle.add(new Point(0,-1*Canvas.DRAWING_SIZE));

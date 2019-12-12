@@ -14,12 +14,16 @@ import com.adamprins.island.Generate;
  *  
  * @authors Adam Prins
  * 
- * @version 0.1.0 
- * 		Initial Build
+ * @version 0.2.0 
+ * 		Added internal colour storage
+ * 		Added set color method
+ * 		Added caculateColors method that calculates triangle colors from their distance to the canvas edge
+ * 		
  *		
  */
 public class Triangle {
 	ArrayList<Point> points;
+	Color color;
 
 	/**
 	 * Creates a new triangle object from an ArrayList of three points
@@ -27,6 +31,7 @@ public class Triangle {
 	 * @param points the three points that make up the triangle
 	 */
 	public Triangle(ArrayList<Point> points) {
+		color=Color.blue;
 		if (points.size()!=3) {
 			throw new IllegalArgumentException("Triagnles can only be created using 3 points");
 		}
@@ -91,12 +96,19 @@ public class Triangle {
 	}
 	
 	/**
+	 * Sets the color of the triangle
+	 */
+	public void setColor(Color color) {
+		this.color=color;
+	}
+	
+	/**
 	 * Returns the color of the triangle
 	 * 
 	 * @return the color of the triangle
 	 */
 	public Color getColor() {
-		return Color.black;
+		return color;
 	}
 	
 	/**
@@ -110,4 +122,52 @@ public class Triangle {
 		s+=points.get(2)+"\n";
 		return s;
 	}
+	
+	/**
+	 * This sets the colours of triangles based on how inland they are
+	 */
+	public static void calculateColors(ArrayList<Triangle> passedTriangles) {
+		ArrayList<Triangle> triangles = new ArrayList<Triangle>(passedTriangles);
+		ArrayList<ArrayList<Point>> pointDepths = new ArrayList<ArrayList<Point>>();
+		pointDepths.add(Generate.baseTriangle().getPoints());
+		
+		int depth=0;
+		while (triangles.size()>0) {
+			ArrayList<Triangle> usedTriangles = new ArrayList<Triangle>();
+			for (Triangle triangle:triangles) {
+				ArrayList<Point> points = triangle.getPoints();
+				if (points.removeAll(pointDepths.get(depth))) {
+					switch (depth) {
+					case 0:
+						triangle.setColor(Color.blue);
+						break;
+					case 1:
+						triangle.setColor(Color.cyan);
+						break;
+					case 2:
+						triangle.setColor(Color.yellow);
+						break;
+					case 3:
+						triangle.setColor(Color.green);
+						break;
+					case 4:
+						triangle.setColor(Color.LIGHT_GRAY);
+						break;
+					default:
+						triangle.setColor(Color.white);
+						break;
+					}
+					if (pointDepths.size()<=(depth+1)) {
+						pointDepths.add(new ArrayList<Point>());
+					}
+					pointDepths.get(depth+1).addAll(points);
+					usedTriangles.add(triangle);
+				};
+			}
+			triangles.removeAll(usedTriangles);
+			depth++;
+		}
+	}
+	
+	
 }

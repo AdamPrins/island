@@ -13,8 +13,9 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.1.0 
- * 		Initial Build
+ * @version 0.2.0 
+ * 		Added additional toggles for drawing
+ * 		Added method to fill triangles
  *		
  */
 public class Canvas extends JPanel {
@@ -26,6 +27,8 @@ public class Canvas extends JPanel {
 	
 	private ArrayList<Triangle> triangles;
 	private boolean paintCirclesBool = false;
+	private boolean paintTriangleBool = true;
+	private boolean paintPointBool = true;
 	
 	/**
 	 * The constructor of this drawing component
@@ -56,16 +59,21 @@ public class Canvas extends JPanel {
         g.setColor(Color.white);
         g.fillRect(0, 0, DRAWING_SIZE, DRAWING_SIZE);
         g.setColor(Color.black);
+        
+        for (Triangle triangle:triangles) {
+            paintTriangle(g, triangle);
+        }
 
         for (Triangle triangle:triangles) {
-        	paintPoints(g, triangle.getPoints());
-            paintTriangle(g, triangle);
-            if (paintCirclesBool) {	paintCircle(g, triangle.getCircle()); }
+        	if (paintPointBool)  	{	paintPoints(g, triangle.getPoints());	}
+        	if (paintTriangleBool)  {	paintTriangleOutline(g, triangle); 		}
+            if (paintCirclesBool) 	{	paintCircle(g, triangle.getCircle()); 	}
         }
+        
         
     }  
     
-    /**
+	/**
      * Paints the given points as small circles
      * 
      * @param g the Graphics to paint on
@@ -80,15 +88,26 @@ public class Canvas extends JPanel {
     }
     
     /**
-     * Paints a given triangle onto the canvas
+     * Paints a given triangle's outline onto the canvas
+     * 
+     * @param g
+     * @param triangle the triangle you want to draw
+     */
+    private void paintTriangleOutline(Graphics g, Triangle triangle) {
+    	g.setColor(Color.black);
+    	g.drawPolygon(triangle.getPolygon());
+    }
+    
+    /**
+     * Fills a given triangle on the canvas
      * 
      * @param g
      * @param triangle the triangle you want to draw
      */
     private void paintTriangle(Graphics g, Triangle triangle) {
-    	g.setColor(Color.black);
-    	g.drawPolygon(triangle.getPolygon());
-    }
+    	g.setColor(triangle.getColor());
+    	g.fillPolygon(triangle.getPolygon());
+	}
     
     /**
      * Draws a given circle onto the canvas
@@ -114,10 +133,24 @@ public class Canvas extends JPanel {
     }
     
     /**
+     * Toggles the visibility of the Points
+     */
+    public void togglePaintPointBool() {
+    	paintPointBool=!paintPointBool;
+    }
+    
+    /**
+     * Toggles the visibility of the Triangles
+     */
+    public void togglePaintTriangleBool() {
+    	paintTriangleBool=!paintTriangleBool;
+    }
+    
+    /**
      * Toggles the visibility of the circles
      */
     public void togglePaintCircleBool() {
     	paintCirclesBool=!paintCirclesBool;
     }
-
+    
 }
