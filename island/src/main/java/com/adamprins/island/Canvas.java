@@ -13,9 +13,8 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.2.0 
- * 		Added additional toggles for drawing
- * 		Added method to fill triangles
+ * @version 0.3.0 
+ * 		Paint booleans all default to false now 
  *		
  */
 public class Canvas extends JPanel {
@@ -27,8 +26,8 @@ public class Canvas extends JPanel {
 	
 	private ArrayList<Triangle> triangles;
 	private boolean paintCirclesBool = false;
-	private boolean paintTriangleBool = true;
-	private boolean paintPointBool = true;
+	private boolean paintTriangleBool = false;
+	private boolean paintPointBool = false;
 	
 	/**
 	 * The constructor of this drawing component

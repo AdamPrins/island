@@ -15,8 +15,12 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.2.0 
- * 		Added more toggle visibility buttons
+ * @version 0.3.0 
+ * 		Added 10 new Points button
+ * 		Added 100 new Points button
+ * 		Added new ocean and a new coast button
+ * 		Added a clear menu button
+ * 		Toggle values now all default to off
  *		
  */
 public class GUI implements ActionListener {
@@ -24,6 +28,7 @@ public class GUI implements ActionListener {
 	
 	/* JMenu File items */
     private JMenuItem quitItem;
+    private JMenuItem clearItem;
     
     /* The output fields */
     private JLabel outputStatic;
@@ -31,6 +36,12 @@ public class GUI implements ActionListener {
     
     /* The JButtons */
     private JButton newPointButton;
+    private JButton newPoint10Button;
+    private JButton newPoint100Button;
+    private JButton newDepth0;
+    private JButton newDepth1;
+    
+    /* The JToggleButtons */
     private JToggleButton triangleVisabilityToggle;
     private JToggleButton pointVisabilityToggle;
     private JToggleButton circleVisabilityToggle;
@@ -60,7 +71,7 @@ public class GUI implements ActionListener {
 	    createPanelSpacing(contentPane);
 	    createInterfacePanel(contentPane);
 	    
-	    frame.setPreferredSize(new Dimension(900,700));
+	    frame.setPreferredSize(new Dimension(900,600));
 	    frame.pack(); // pack contents into our frame
         frame.setResizable(false); // we can resize it
         frame.setVisible(true); // make it visible
@@ -91,6 +102,11 @@ public class GUI implements ActionListener {
 	    quitItem = new JMenuItem("Quit");
 	    fileMenu.add(quitItem);
 	    quitItem.addActionListener(this);
+	    
+	    clearItem = new JMenuItem("Clear");
+	    fileMenu.add(clearItem);
+	    clearItem.addActionListener(this);
+	    
 	    
 	}
 	
@@ -140,34 +156,54 @@ public class GUI implements ActionListener {
 	    c.anchor = (GridBagConstraints.LINE_START);
 	    c.fill = GridBagConstraints.HORIZONTAL;
 	    
-	    newPointButton = new JButton("New Point");
+	    newPointButton = new JButton("1 Point");
 	    newPointButton.addActionListener(this);
 	    c.gridx = 0;			c.gridy = 3;
 	    interfacePanel.add(newPointButton,c);
 	    
+	    newPoint10Button = new JButton("10 Points");
+	    newPoint10Button.addActionListener(this);
+	    c.gridx = 1;			c.gridy = 3;
+	    interfacePanel.add(newPoint10Button,c);
+	    
+	    newPoint100Button = new JButton("100 Points");
+	    newPoint100Button.addActionListener(this);
+	    c.gridx = 2;			c.gridy = 3;
+	    interfacePanel.add(newPoint100Button,c);
+	    
+	    newDepth0 = new JButton("New Ocean");
+	    newDepth0.addActionListener(this);
+	    c.gridx = 0;			c.gridy = 4;
+	    interfacePanel.add(newDepth0,c);
+	    
+	    newDepth1 = new JButton("New Coast");
+	    newDepth1.addActionListener(this);
+	    c.gridx = 1;			c.gridy = 4;
+	    interfacePanel.add(newDepth1,c);
+	    
 	    pointVisabilityToggle = new JToggleButton("Points");
 	    pointVisabilityToggle.addActionListener(this);
-	    pointVisabilityToggle.setSelected(true);
-	    c.gridx = 0;			c.gridy = 4;
+	    pointVisabilityToggle.setSelected(false);
+	    c.gridx = 0;			c.gridy = 5;
 	    interfacePanel.add(pointVisabilityToggle,c);
 	    
 	    triangleVisabilityToggle = new JToggleButton("Triangles");
 	    triangleVisabilityToggle.addActionListener(this);
-	    triangleVisabilityToggle.setSelected(true);
-	    c.gridx = 1;			c.gridy = 4;
+	    triangleVisabilityToggle.setSelected(false);
+	    c.gridx = 1;			c.gridy = 5;
 	    interfacePanel.add(triangleVisabilityToggle,c);
 	    
 	    circleVisabilityToggle = new JToggleButton("Circles");
 	    circleVisabilityToggle.addActionListener(this);
 	    circleVisabilityToggle.setSelected(false);
-	    c.gridx = 2;			c.gridy = 4;
+	    c.gridx = 2;			c.gridy = 5;
 	    interfacePanel.add(circleVisabilityToggle,c);
 	    
 	    outputStatic = new JLabel("Output: ");
-	    c.gridx = 0;			c.gridy = 5;
+	    c.gridx = 0;			c.gridy = 6;
 	    interfacePanel.add(outputStatic,c);
 	    
-	    c.gridx = 0;			c.gridy = 6;
+	    c.gridx = 0;			c.gridy = 7;
 	    c.weightx=1;
 	    c.gridwidth=4;
 	    output = new JLabel(" ");
@@ -217,9 +253,31 @@ public class GUI implements ActionListener {
 		if (button == newPointButton) {
 			Point newPoint = Generate.point();
 			triangles = Generate.triangulation(triangles, newPoint);
-			canvas.setArray(triangles);
-			canvas.repaint();
 		}
+		else if (button == newPoint10Button) {
+			for (int i=0; i<10; i++) {
+				Point newPoint = Generate.point();
+				triangles = Generate.triangulation(triangles, newPoint);
+			}
+		}
+		else if (button == newPoint100Button) {
+			for (int i=0; i<100; i++) {
+				Point newPoint = Generate.point();
+				triangles = Generate.triangulation(triangles, newPoint);
+			}
+		}
+		else if (button == newDepth0) {
+			Point newPoint = Generate.point();
+			Triangle.addDepth0Point(newPoint);
+			triangles = Generate.triangulation(triangles, newPoint);
+		}
+		else if (button == newDepth1) {
+			Point newPoint = Generate.point();
+			Triangle.addDepth1Point(newPoint);
+			triangles = Generate.triangulation(triangles, newPoint);
+		}
+		canvas.setArray(triangles);
+		canvas.repaint();
 	}
 	
 	/**
@@ -250,6 +308,11 @@ public class GUI implements ActionListener {
 	private void actionOnJMenu(JMenuItem item) {
 		if (item == quitItem) {
             System.exit(0);
+        }
+		else if (item == clearItem) {
+			triangles = Generate.triangulation(Generate.points(0));
+            canvas.setArray(triangles);
+            canvas.repaint();
         }
 	}
 	

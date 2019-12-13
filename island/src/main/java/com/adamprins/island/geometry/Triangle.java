@@ -14,16 +14,23 @@ import com.adamprins.island.Generate;
  *  
  * @authors Adam Prins
  * 
- * @version 0.2.0 
- * 		Added internal colour storage
- * 		Added set color method
- * 		Added caculateColors method that calculates triangle colors from their distance to the canvas edge
+ * @version 0.3.0 
+ * 		Added slight color permutations
+ * 		Added ArrayLists that contain some starting depth levels
+ * 		Added cirlce field so that each triangle doesn't need to recalculate its circle every time a point is added
  * 		
  *		
  */
 public class Triangle {
-	ArrayList<Point> points;
-	Color color;
+	private ArrayList<Point> points;
+	private static ArrayList<Point> depth0Points = Generate.baseTriangle().getPoints();
+	private static ArrayList<Point> depth1Points = new ArrayList<Point>();
+	private Color color;
+	public static final int RANDOM_VARIATION=20;
+	public final int r;
+	public final int g;
+	public final int b;
+	private Circle circle;
 
 	/**
 	 * Creates a new triangle object from an ArrayList of three points
@@ -31,7 +38,10 @@ public class Triangle {
 	 * @param points the three points that make up the triangle
 	 */
 	public Triangle(ArrayList<Point> points) {
-		color=Color.blue;
+		r=(int)(Math.random()*RANDOM_VARIATION-RANDOM_VARIATION/2);
+		g=(int)(Math.random()*RANDOM_VARIATION-RANDOM_VARIATION/2);
+		b=(int)(Math.random()*RANDOM_VARIATION-RANDOM_VARIATION/2);
+		color=Color.white;
 		if (points.size()!=3) {
 			throw new IllegalArgumentException("Triagnles can only be created using 3 points");
 		}
@@ -66,7 +76,10 @@ public class Triangle {
 	 * @return a Circle
 	 */
 	public Circle getCircle() {
-		return Generate.circle(points);
+		if (circle == null) {
+			circle = Generate.circle(points);
+		}
+		return circle;
 	}
 	
 	/**
@@ -125,11 +138,14 @@ public class Triangle {
 	
 	/**
 	 * This sets the colours of triangles based on how inland they are
+	 * 
+	 * @param passedTriangles the ArrayList of triangles to be colored
 	 */
 	public static void calculateColors(ArrayList<Triangle> passedTriangles) {
 		ArrayList<Triangle> triangles = new ArrayList<Triangle>(passedTriangles);
 		ArrayList<ArrayList<Point>> pointDepths = new ArrayList<ArrayList<Point>>();
-		pointDepths.add(Generate.baseTriangle().getPoints());
+		pointDepths.add(new ArrayList<Point>(depth0Points));
+		pointDepths.add(new ArrayList<Point>(depth1Points));
 		
 		int depth=0;
 		while (triangles.size()>0) {
@@ -137,26 +153,29 @@ public class Triangle {
 			for (Triangle triangle:triangles) {
 				ArrayList<Point> points = triangle.getPoints();
 				if (points.removeAll(pointDepths.get(depth))) {
+					Color color;
 					switch (depth) {
-					case 0:
-						triangle.setColor(Color.blue);
+					case 0:		//Deep ocean
+						color = new Color(15,110,240);
 						break;
-					case 1:
-						triangle.setColor(Color.cyan);
+					case 1:		//Coastal ocean
+						color = new Color(60,200,240);
 						break;
-					case 2:
-						triangle.setColor(Color.yellow);
+					case 2:		//Beach
+						color = new Color(240,225,70);
 						break;
-					case 3:
-						triangle.setColor(Color.green);
+					case 3:		//Grasslands
+						color = new Color(22,220,15);
 						break;
-					case 4:
-						triangle.setColor(Color.LIGHT_GRAY);
+					case 4:		//Forest
+						color = new Color(50,150,35);
 						break;
-					default:
-						triangle.setColor(Color.white);
+					default:	//Hills
+						color = new Color(130,140,140);
 						break;
 					}
+					color = new Color(color.getRed()+triangle.r,color.getGreen()+triangle.g,color.getBlue()+triangle.b);
+					triangle.setColor(color);
 					if (pointDepths.size()<=(depth+1)) {
 						pointDepths.add(new ArrayList<Point>());
 					}
@@ -169,5 +188,36 @@ public class Triangle {
 		}
 	}
 	
+	/**
+	 * A different color scheme I made. This outputs the trans flag.
+	 * 
+	 * @param passedTriangles the ArrayList of triangles to be colored
+	 */
+	public static void calculateColorsAlt(ArrayList<Triangle> passedTriangles) {
+		ArrayList<Triangle> triangles = new ArrayList<Triangle>(passedTriangles);
+		for (Triangle triangle:triangles) {
+			int circleY = (int)triangle.getCircle().getCenterY();
+			Color color;
+			if (circleY<100 || circleY>400) {
+				color = new Color(85,205,245);
+			}
+			else if (circleY<200 || circleY>300) {
+				color = new Color(245,168,184);
+			}
+			else {
+				color = new Color(245,245,245);
+			}
+			color = new Color(color.getRed()+triangle.r,color.getGreen()+triangle.g,color.getBlue()+triangle.b);
+			triangle.setColor(color);
+		}
+	}
+	
+	public static void addDepth0Point(Point point) {
+		depth0Points.add(point);
+	}
+	
+	public static void addDepth1Point(Point point) {
+		depth1Points.add(point);
+	}
 	
 }
