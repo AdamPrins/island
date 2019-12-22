@@ -13,26 +13,32 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.2.0 
- * 		abstracted canvas boundaries into static final fields
- * 		Added functionality for calculating triangle colours
- * 		Added additional comments
+ * @version 0.4.0 
+ * 		Added distribution types for point generation
+ * 		Types are: even, center, circle, diagonal, two peaks
+ * 		
  *		
  */
 public class Generate {
 	
 	public static final int CANVAS_BOUNDARIES = 10;
+	public static final int CANVAS_CENTER = Canvas.DRAWING_SIZE/2;
+	public static final int CANVAS_RADIUS = Canvas.DRAWING_SIZE/2 - CANVAS_BOUNDARIES;
 	public static final double CANVAS_SCALE = (Canvas.DRAWING_SIZE-2*CANVAS_BOUNDARIES) / (double)Canvas.DRAWING_SIZE;
+	public static enum Distribution {even, centerBias, circleBias, diagonalBias, twoPeak};
+	
+	private static final Point peak1 = Generate.point(Distribution.even);
+	private static final Point peak2 = Generate.point(Distribution.even);
 	
 	/**
 	 * Creates an ArrayList of n random points, that are somewhere on the canvas
 	 * 
 	 * @return an ArrayList of n points
 	 */
-	public static ArrayList<Point> points(int n) {
+	public static ArrayList<Point> points(int n, Distribution distribution) {
 		ArrayList<Point> points = new ArrayList<Point>();
 		for (int i=0; i<n; i++) {
-			points.add(Generate.point());
+			points.add(Generate.point(distribution));
 		}
 		
 		return points;
@@ -40,13 +46,55 @@ public class Generate {
 	
 	/**
 	 * Creates a random point that is somewhere on the canvas
-	 * Will be 50 pixels from the edge
+	 * Will be CANVAS_BOUNDARIES pixels from the edge
+	 * Is effected by different types of basis;
 	 * 
+	 * @param creates a point according to the passed distribution
 	 * @return a new random Point
 	 */
-	public static Point point() {
-		int x = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
-		int y = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+	public static Point point(Distribution distribution) {
+		int x = -1;
+		int y = -1;
+		if (distribution.equals(Distribution.even)) {
+			x = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+			y = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+		}
+		else if (distribution.equals(Distribution.centerBias)) {
+			x = (int) ((Math.random()-Math.random()) * CANVAS_RADIUS + CANVAS_CENTER);
+			y = (int) ((Math.random()-Math.random()) * CANVAS_RADIUS + CANVAS_CENTER);
+		}
+		else if (distribution.equals(Distribution.circleBias)) {
+			double dist;
+			do {
+				x = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+				y = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+				dist = Math.sqrt(Math.pow((x-CANVAS_CENTER), 2)+Math.pow((y-CANVAS_CENTER), 2));
+			} while (dist>CANVAS_RADIUS);
+		}
+		else if (distribution.equals(Distribution.diagonalBias)) {
+			do {
+				int line = (int) (Math.random() * Canvas.DRAWING_SIZE * CANVAS_SCALE + CANVAS_BOUNDARIES);
+				int xOffset = (int) ((Math.random()-Math.random()) * CANVAS_RADIUS * CANVAS_SCALE);
+				int yOffset = (int) ((Math.random()-Math.random()) * CANVAS_RADIUS * CANVAS_SCALE);
+				x = line + xOffset;
+				y = line + yOffset;
+			} while (x<0 || y<0 || x>Canvas.DRAWING_SIZE || y>Canvas.DRAWING_SIZE);
+		}
+		else if (distribution.equals(Distribution.twoPeak)) {
+			int type = (int) (Math.random()*2);
+			int peakRadius = Canvas.DRAWING_SIZE/5;
+			Point peak;
+			
+			if (type == 1) peak = peak1;
+			else peak = peak2;
+			
+			double dist;
+			do {
+				x = (int) ((Math.random()-Math.random()) * peakRadius + peak.x);
+				y = (int) ((Math.random()-Math.random()) * peakRadius + peak.y);
+				dist = Math.sqrt(Math.pow((x-CANVAS_CENTER), 2)+Math.pow((y-CANVAS_CENTER), 2));
+			} while (dist>CANVAS_RADIUS || x<0 || y<0 || x>Canvas.DRAWING_SIZE || y>Canvas.DRAWING_SIZE);
+		}
 		return new Point(x,y);
 	}
 	

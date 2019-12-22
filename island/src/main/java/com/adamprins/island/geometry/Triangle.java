@@ -14,10 +14,8 @@ import com.adamprins.island.Generate;
  *  
  * @authors Adam Prins
  * 
- * @version 0.3.0 
- * 		Added slight color permutations
- * 		Added ArrayLists that contain some starting depth levels
- * 		Added cirlce field so that each triangle doesn't need to recalculate its circle every time a point is added
+ * @version 0.4.0
+ * 		Removed generic Constructor 
  * 		
  *		
  */
@@ -48,13 +46,6 @@ public class Triangle {
 		else {
 			this.points=points;
 		}
-	}
-	
-	/**
-	 * Creates a new triangle object from 3 random new points
-	 */
-	public Triangle() {
-		this(Generate.points(3));
 	}
 	
 	/**

@@ -3,6 +3,7 @@ package com.adamprins.island;
 import java.awt.*;
 import javax.swing.*;
 
+import com.adamprins.island.Generate.Distribution;
 import com.adamprins.island.geometry.Triangle;
 
 import java.awt.event.*;
@@ -15,12 +16,8 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.3.0 
- * 		Added 10 new Points button
- * 		Added 100 new Points button
- * 		Added new ocean and a new coast button
- * 		Added a clear menu button
- * 		Toggle values now all default to off
+ * @version 0.4.0 
+ * 		Added a drop down menu for selecting a distribution method
  *		
  */
 public class GUI implements ActionListener {
@@ -45,6 +42,9 @@ public class GUI implements ActionListener {
     private JToggleButton triangleVisabilityToggle;
     private JToggleButton pointVisabilityToggle;
     private JToggleButton circleVisabilityToggle;
+    
+    /* The drop down menu for the distribution methods */
+    private JComboBox<Distribution> distributionDropdown;
     
     
     /* The canvas where the drawing is performed */
@@ -210,6 +210,10 @@ public class GUI implements ActionListener {
 	    output.setPreferredSize(new Dimension(150,30));
 	    interfacePanel.add(output,c);
 	    
+        distributionDropdown = new JComboBox<Distribution>(Distribution.values());
+	    c.gridx = 1;			c.gridy = 8;
+	    interfacePanel.add(distributionDropdown,c);
+	    
 		c.gridx=CANVASE_SIZE+3;	c.gridy=0;
 		c.gridwidth=4;			c.gridheight=CANVASE_SIZE;
 	    c.ipadx = 5; 			c.ipady = 5;
@@ -241,7 +245,6 @@ public class GUI implements ActionListener {
             JMenuItem item = (JMenuItem)o;
             actionOnJMenu(item);
         }
-
     }
     
     /**
@@ -250,32 +253,32 @@ public class GUI implements ActionListener {
      * @param button the button that was pressed
      */
 	private void actionOnJButton(JButton button) {
+		int limit=0;
+		
 		if (button == newPointButton) {
-			Point newPoint = Generate.point();
-			triangles = Generate.triangulation(triangles, newPoint);
 		}
 		else if (button == newPoint10Button) {
-			for (int i=0; i<10; i++) {
-				Point newPoint = Generate.point();
-				triangles = Generate.triangulation(triangles, newPoint);
-			}
+			limit=10;
 		}
 		else if (button == newPoint100Button) {
-			for (int i=0; i<100; i++) {
-				Point newPoint = Generate.point();
-				triangles = Generate.triangulation(triangles, newPoint);
-			}
+			limit=100;
 		}
 		else if (button == newDepth0) {
-			Point newPoint = Generate.point();
-			Triangle.addDepth0Point(newPoint);
-			triangles = Generate.triangulation(triangles, newPoint);
+			limit=1;
 		}
 		else if (button == newDepth1) {
-			Point newPoint = Generate.point();
-			Triangle.addDepth1Point(newPoint);
+			limit=1;
+		}
+		
+		for (int i=0; i<limit; i++) {
+			Point newPoint = Generate.point((Distribution) distributionDropdown.getSelectedItem());
+			
+			if 		(button == newDepth0) Triangle.addDepth0Point(newPoint);
+			else if (button == newDepth1) Triangle.addDepth1Point(newPoint);
+			
 			triangles = Generate.triangulation(triangles, newPoint);
 		}
+		
 		canvas.setArray(triangles);
 		canvas.repaint();
 	}
@@ -310,7 +313,7 @@ public class GUI implements ActionListener {
             System.exit(0);
         }
 		else if (item == clearItem) {
-			triangles = Generate.triangulation(Generate.points(0));
+			triangles = Generate.triangulation(Generate.points(0, Distribution.even));
             canvas.setArray(triangles);
             canvas.repaint();
         }
@@ -324,7 +327,7 @@ public class GUI implements ActionListener {
 	}
 	
 	private void initilizeTriangles() {
-        triangles = Generate.triangulation(Generate.points(0));
+        triangles = Generate.triangulation(Generate.points(0, Distribution.even));
         canvas.setArray(triangles);
 	}
     
