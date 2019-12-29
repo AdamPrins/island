@@ -16,8 +16,8 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.4.0 
- * 		Added a drop down menu for selecting a distribution method
+ * @version 0.4.1 
+ * 		Added limit to 1 Point button, it was missing in previous release
  *		
  */
 public class GUI implements ActionListener {
@@ -256,6 +256,7 @@ public class GUI implements ActionListener {
 		int limit=0;
 		
 		if (button == newPointButton) {
+			limit=1;
 		}
 		else if (button == newPoint10Button) {
 			limit=10;
