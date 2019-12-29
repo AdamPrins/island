@@ -137,6 +137,7 @@ public class Generate {
 			triangles.remove(triangle);
 		}
 		//Removes duplicate edges
+		//This will be all the inner lines
 		for (int i=0; i<badEdges.size(); i++) {
 			for (int j=i+1; j<badEdges.size(); j++) {
 				if (badEdges.get(i).equals(badEdges.get(j))) {

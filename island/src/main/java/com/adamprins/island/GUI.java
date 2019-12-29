@@ -16,8 +16,8 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.4.0 
- * 		Added a drop down menu for selecting a distribution method
+ * @version 0.5.0 
+ * 		Removed new Depth x buttons on this branch
  *		
  */
 public class GUI implements ActionListener {
@@ -35,8 +35,6 @@ public class GUI implements ActionListener {
     private JButton newPointButton;
     private JButton newPoint10Button;
     private JButton newPoint100Button;
-    private JButton newDepth0;
-    private JButton newDepth1;
     
     /* The JToggleButtons */
     private JToggleButton triangleVisabilityToggle;
@@ -171,16 +169,6 @@ public class GUI implements ActionListener {
 	    c.gridx = 2;			c.gridy = 3;
 	    interfacePanel.add(newPoint100Button,c);
 	    
-	    newDepth0 = new JButton("New Ocean");
-	    newDepth0.addActionListener(this);
-	    c.gridx = 0;			c.gridy = 4;
-	    interfacePanel.add(newDepth0,c);
-	    
-	    newDepth1 = new JButton("New Coast");
-	    newDepth1.addActionListener(this);
-	    c.gridx = 1;			c.gridy = 4;
-	    interfacePanel.add(newDepth1,c);
-	    
 	    pointVisabilityToggle = new JToggleButton("Points");
 	    pointVisabilityToggle.addActionListener(this);
 	    pointVisabilityToggle.setSelected(false);
@@ -256,6 +244,7 @@ public class GUI implements ActionListener {
 		int limit=0;
 		
 		if (button == newPointButton) {
+			limit=1;
 		}
 		else if (button == newPoint10Button) {
 			limit=10;
@@ -263,18 +252,9 @@ public class GUI implements ActionListener {
 		else if (button == newPoint100Button) {
 			limit=100;
 		}
-		else if (button == newDepth0) {
-			limit=1;
-		}
-		else if (button == newDepth1) {
-			limit=1;
-		}
 		
 		for (int i=0; i<limit; i++) {
 			Point newPoint = Generate.point((Distribution) distributionDropdown.getSelectedItem());
-			
-			if 		(button == newDepth0) Triangle.addDepth0Point(newPoint);
-			else if (button == newDepth1) Triangle.addDepth1Point(newPoint);
 			
 			triangles = Generate.triangulation(triangles, newPoint);
 		}

@@ -13,8 +13,8 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.3.0 
- * 		Paint booleans all default to false now 
+ * @version 0.5.0 
+ * 		Painting of the triangles is now done in the triangles
  *		
  */
 public class Canvas extends JPanel {
@@ -60,7 +60,7 @@ public class Canvas extends JPanel {
         g.setColor(Color.black);
         
         for (Triangle triangle:triangles) {
-            paintTriangle(g, triangle);
+            triangle.paint(g);
         }
 
         for (Triangle triangle:triangles) {
@@ -96,17 +96,6 @@ public class Canvas extends JPanel {
     	g.setColor(Color.black);
     	g.drawPolygon(triangle.getPolygon());
     }
-    
-    /**
-     * Fills a given triangle on the canvas
-     * 
-     * @param g
-     * @param triangle the triangle you want to draw
-     */
-    private void paintTriangle(Graphics g, Triangle triangle) {
-    	g.setColor(triangle.getColor());
-    	g.fillPolygon(triangle.getPolygon());
-	}
     
     /**
      * Draws a given circle onto the canvas
