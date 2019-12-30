@@ -7,6 +7,7 @@ import com.adamprins.island.Generate.Distribution;
 import com.adamprins.island.geometry.Triangle;
 
 import java.awt.event.*;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -16,8 +17,10 @@ import java.util.ArrayList;
  *  
  * @authors Adam Prins
  * 
- * @version 0.4.1 
- * 		Added limit to 1 Point button, it was missing in previous release
+ * @version 0.5.0
+ * 		Removed Depth X Buttons
+ * 		Added Point 1000 and 10000 buttons
+ * 		Added new Picture Menu item
  *		
  */
 public class GUI implements ActionListener {
@@ -26,17 +29,14 @@ public class GUI implements ActionListener {
 	/* JMenu File items */
     private JMenuItem quitItem;
     private JMenuItem clearItem;
-    
-    /* The output fields */
-    private JLabel outputStatic;
-    private JLabel output;
+    private JMenuItem newPictureItem;
     
     /* The JButtons */
     private JButton newPointButton;
     private JButton newPoint10Button;
     private JButton newPoint100Button;
-    private JButton newDepth0;
-    private JButton newDepth1;
+    private JButton newPoint1000Button;
+    private JButton newPoint10000Button;
     
     /* The JToggleButtons */
     private JToggleButton triangleVisabilityToggle;
@@ -77,11 +77,6 @@ public class GUI implements ActionListener {
         frame.setVisible(true); // make it visible
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE); //stops the program when the x is pressed
         
-        try {
-		} catch (Exception e) {
-			output.setText(e.getMessage());
-		}
-        
         initilizeTriangles();
         canvas.repaint();
 	}
@@ -107,6 +102,10 @@ public class GUI implements ActionListener {
 	    fileMenu.add(clearItem);
 	    clearItem.addActionListener(this);
 	    
+	    newPictureItem = new JMenuItem("New Picture");
+	    fileMenu.add(newPictureItem);
+	    newPictureItem.addActionListener(this);
+	    
 	    
 	}
 	
@@ -120,7 +119,7 @@ public class GUI implements ActionListener {
 	    GridBagConstraints c = new GridBagConstraints();
 	    c.gridx=0;					c.gridy=0;
 		c.gridwidth=1;				c.gridheight=CANVASE_SIZE;
-	    c.ipadx = 20; 				c.ipady = CANVASE_SIZE;	//c.ipadx fully controls the space between the left and the canvas
+	    c.ipadx = 10; 				c.ipady = CANVASE_SIZE;	//c.ipadx fully controls the space between the left and the canvas
 	    c.weightx=1;
 	    contentPane.add(Box.createGlue(),c);
 	    
@@ -140,7 +139,7 @@ public class GUI implements ActionListener {
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx=CANVASE_SIZE+2;		c.gridy=0;
 		c.gridwidth=1;				c.gridheight=6;
-	    c.ipadx = 20; 				c.ipady = 5;	//c.ipadx fully controls the space between contentPane and interfacePanel
+	    c.ipadx = 5; 				c.ipady = 5;	//c.ipadx fully controls the space between contentPane and interfacePanel
 	    c.weightx=0;
 	    contentPane.add(Box.createGlue(),c);
 	}
@@ -171,15 +170,15 @@ public class GUI implements ActionListener {
 	    c.gridx = 2;			c.gridy = 3;
 	    interfacePanel.add(newPoint100Button,c);
 	    
-	    newDepth0 = new JButton("New Ocean");
-	    newDepth0.addActionListener(this);
+	    newPoint1000Button = new JButton("1000 Points");
+	    newPoint1000Button.addActionListener(this);
 	    c.gridx = 0;			c.gridy = 4;
-	    interfacePanel.add(newDepth0,c);
+	    interfacePanel.add(newPoint1000Button,c);
 	    
-	    newDepth1 = new JButton("New Coast");
-	    newDepth1.addActionListener(this);
+	    newPoint10000Button = new JButton("10000 Points");
+	    newPoint10000Button.addActionListener(this);
 	    c.gridx = 1;			c.gridy = 4;
-	    interfacePanel.add(newDepth1,c);
+	    interfacePanel.add(newPoint10000Button,c);
 	    
 	    pointVisabilityToggle = new JToggleButton("Points");
 	    pointVisabilityToggle.addActionListener(this);
@@ -198,17 +197,6 @@ public class GUI implements ActionListener {
 	    circleVisabilityToggle.setSelected(false);
 	    c.gridx = 2;			c.gridy = 5;
 	    interfacePanel.add(circleVisabilityToggle,c);
-	    
-	    outputStatic = new JLabel("Output: ");
-	    c.gridx = 0;			c.gridy = 6;
-	    interfacePanel.add(outputStatic,c);
-	    
-	    c.gridx = 0;			c.gridy = 7;
-	    c.weightx=1;
-	    c.gridwidth=4;
-	    output = new JLabel(" ");
-	    output.setPreferredSize(new Dimension(150,30));
-	    interfacePanel.add(output,c);
 	    
         distributionDropdown = new JComboBox<Distribution>(Distribution.values());
 	    c.gridx = 1;			c.gridy = 8;
@@ -264,22 +252,19 @@ public class GUI implements ActionListener {
 		else if (button == newPoint100Button) {
 			limit=100;
 		}
-		else if (button == newDepth0) {
-			limit=1;
+		else if (button == newPoint1000Button) {
+			limit=1000;
 		}
-		else if (button == newDepth1) {
-			limit=1;
+		else if (button == newPoint10000Button) {
+			limit=10000;
 		}
 		
 		for (int i=0; i<limit; i++) {
 			Point newPoint = Generate.point((Distribution) distributionDropdown.getSelectedItem());
-			
-			if 		(button == newDepth0) Triangle.addDepth0Point(newPoint);
-			else if (button == newDepth1) Triangle.addDepth1Point(newPoint);
-			
 			triangles = Generate.triangulation(triangles, newPoint);
 		}
 		
+		Triangle.calculateColors(triangles);
 		canvas.setArray(triangles);
 		canvas.repaint();
 	}
@@ -318,6 +303,19 @@ public class GUI implements ActionListener {
             canvas.setArray(triangles);
             canvas.repaint();
         }
+		else if (item == newPictureItem) {
+			JFileChooser jfc = new JFileChooser(Generate.getFile());
+
+			int returnValue = jfc.showOpenDialog(null);
+			// int returnValue = jfc.showSaveDialog(null);
+
+			if (returnValue == JFileChooser.APPROVE_OPTION) {
+				File selectedFile = jfc.getSelectedFile();
+				Generate.setNewImage(selectedFile.getAbsolutePath());
+				Triangle.calculateColors(triangles);
+				canvas.repaint();
+			}
+		}
 	}
 	
 	/**

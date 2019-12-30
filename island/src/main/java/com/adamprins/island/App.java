@@ -9,8 +9,8 @@ package com.adamprins.island;
  * 		Initial Build
  *		
  */
-public class App 
-{
+public class App {
+	
     public static void main( String[] args )
     {
         new GUI();

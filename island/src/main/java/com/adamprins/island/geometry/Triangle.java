@@ -5,6 +5,7 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.util.ArrayList;
 
+import com.adamprins.island.Canvas;
 import com.adamprins.island.Generate;
 
 /**
@@ -14,17 +15,16 @@ import com.adamprins.island.Generate;
  *  
  * @authors Adam Prins
  * 
- * @version 0.4.0
- * 		Removed generic Constructor 
+ * @version 0.5.0
+ * 		RANDOME_VARIATION set to 0 
+ * 		Edited colouring method
  * 		
  *		
  */
 public class Triangle {
 	private ArrayList<Point> points;
-	private static ArrayList<Point> depth0Points = Generate.baseTriangle().getPoints();
-	private static ArrayList<Point> depth1Points = new ArrayList<Point>();
 	private Color color;
-	public static final int RANDOM_VARIATION=20;
+	public static final int RANDOM_VARIATION=0;
 	public final int r;
 	public final int g;
 	public final int b;
@@ -128,87 +128,57 @@ public class Triangle {
 	}
 	
 	/**
-	 * This sets the colours of triangles based on how inland they are
+	 * This sets the colours of triangles based on the given image
 	 * 
 	 * @param passedTriangles the ArrayList of triangles to be colored
 	 */
-	public static void calculateColors(ArrayList<Triangle> passedTriangles) {
-		ArrayList<Triangle> triangles = new ArrayList<Triangle>(passedTriangles);
-		ArrayList<ArrayList<Point>> pointDepths = new ArrayList<ArrayList<Point>>();
-		pointDepths.add(new ArrayList<Point>(depth0Points));
-		pointDepths.add(new ArrayList<Point>(depth1Points));
+	public static void calculateColors(ArrayList<Triangle> triangles) {
 		
-		int depth=0;
-		while (triangles.size()>0) {
-			ArrayList<Triangle> usedTriangles = new ArrayList<Triangle>();
-			for (Triangle triangle:triangles) {
-				ArrayList<Point> points = triangle.getPoints();
-				if (points.removeAll(pointDepths.get(depth))) {
-					Color color;
-					switch (depth) {
-					case 0:		//Deep ocean
-						color = new Color(15,110,240);
-						break;
-					case 1:		//Coastal ocean
-						color = new Color(60,200,240);
-						break;
-					case 2:		//Beach
-						color = new Color(240,225,70);
-						break;
-					case 3:		//Grasslands
-						color = new Color(22,220,15);
-						break;
-					case 4:		//Forest
-						color = new Color(50,150,35);
-						break;
-					default:	//Hills
-						color = new Color(130,140,140);
-						break;
-					}
-					color = new Color(color.getRed()+triangle.r,color.getGreen()+triangle.g,color.getBlue()+triangle.b);
-					triangle.setColor(color);
-					if (pointDepths.size()<=(depth+1)) {
-						pointDepths.add(new ArrayList<Point>());
-					}
-					pointDepths.get(depth+1).addAll(points);
-					usedTriangles.add(triangle);
-				};
-			}
-			triangles.removeAll(usedTriangles);
-			depth++;
-		}
-	}
-	
-	/**
-	 * A different color scheme I made. This outputs the trans flag.
-	 * 
-	 * @param passedTriangles the ArrayList of triangles to be colored
-	 */
-	public static void calculateColorsAlt(ArrayList<Triangle> passedTriangles) {
-		ArrayList<Triangle> triangles = new ArrayList<Triangle>(passedTriangles);
+		
 		for (Triangle triangle:triangles) {
-			int circleY = (int)triangle.getCircle().getCenterY();
-			Color color;
-			if (circleY<100 || circleY>400) {
-				color = new Color(85,205,245);
+			ArrayList<Point> points = triangle.getPoints();
+			int max_x = points.get(0).x;
+			int max_y = points.get(0).y;
+			int min_x = points.get(0).x;
+			int min_y = points.get(0).y;
+			
+			for (int i=1; i<3; i++) {
+				if (points.get(i).x>max_x)	max_x=points.get(i).x;
+				if (points.get(i).y>max_y)	max_y=points.get(i).y;
+				if (points.get(i).x<min_x)	min_x=points.get(i).x;
+				if (points.get(i).y<min_y)	min_y=points.get(i).y;
 			}
-			else if (circleY<200 || circleY>300) {
-				color = new Color(245,168,184);
+			if (max_x>=Canvas.DRAWING_SIZE) max_x=Canvas.DRAWING_SIZE-1;
+			if (max_y>=Canvas.DRAWING_SIZE) max_x=Canvas.DRAWING_SIZE-1;
+			if (min_x<0) min_x=0;
+			if (min_y<0) min_y=0;
+			
+			int r=0;
+			int g=0;
+			int b=0;
+			int pixels=0;
+			Polygon poly = triangle.getPolygon();
+			for (int x=min_x; x<max_x; x++) {
+				for (int y=min_y; y<max_y; y++) {
+					if (poly.contains(x, y)) {
+						int[] pixel = Generate.pixelColor(x, y);
+						r+=pixel[0];
+						g+=pixel[1];
+						b+=pixel[2];
+						pixels++;
+					}
+					
+				}
 			}
-			else {
-				color = new Color(245,245,245);
+			if (pixels==0) {
+				int[] pixel = Generate.pixelColor(min_x, min_y);
+				r+=pixel[0];
+				g+=pixel[1];
+				b+=pixel[2];
+				pixels++;
 			}
-			color = new Color(color.getRed()+triangle.r,color.getGreen()+triangle.g,color.getBlue()+triangle.b);
-			triangle.setColor(color);
+			
+			triangle.setColor(new Color(r/pixels,g/pixels,b/pixels));
 		}
 	}
-	
-	public static void addDepth0Point(Point point) {
-		depth0Points.add(point);
-	}
-	
-	public static void addDepth1Point(Point point) {
-		depth1Points.add(point);
-	}
-	
 }

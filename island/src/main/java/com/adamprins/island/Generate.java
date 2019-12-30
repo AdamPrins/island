@@ -1,7 +1,12 @@
 package com.adamprins.island;
 
 import java.awt.Point;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
 import java.util.ArrayList;
+
+import javax.imageio.ImageIO;
 
 import com.adamprins.island.geometry.Circle;
 import com.adamprins.island.geometry.Line;
@@ -13,15 +18,17 @@ import com.adamprins.island.geometry.Triangle;
  *  
  * @authors Adam Prins
  * 
- * @version 0.4.0 
- * 		Added distribution types for point generation
- * 		Types are: even, center, circle, diagonal, two peaks
+ * @version 0.5.0 
+ * 		Added fields for image data
+ * 		Added methods for accessing image data
+ * 		Added get method for file pointed by path field
+ * 		Added a set method to change the path field
  * 		
  *		
  */
 public class Generate {
 	
-	public static final int CANVAS_BOUNDARIES = 10;
+	public static final int CANVAS_BOUNDARIES = 0;
 	public static final int CANVAS_CENTER = Canvas.DRAWING_SIZE/2;
 	public static final int CANVAS_RADIUS = Canvas.DRAWING_SIZE/2 - CANVAS_BOUNDARIES;
 	public static final double CANVAS_SCALE = (Canvas.DRAWING_SIZE-2*CANVAS_BOUNDARIES) / (double)Canvas.DRAWING_SIZE;
@@ -29,6 +36,13 @@ public class Generate {
 	
 	private static final Point peak1 = Generate.point(Distribution.even);
 	private static final Point peak2 = Generate.point(Distribution.even);
+	
+	private static int[][] rPixels;		//Red pixels
+	private static int[][] gPixels;		//Blue Pixels
+	private static int[][] bPixels;		//Green Pixels
+	
+	//Image location
+	private static String path = "/Users/adam/Downloads/SCTA-copy.jpg";
 	
 	/**
 	 * Creates an ArrayList of n random points, that are somewhere on the canvas
@@ -154,7 +168,6 @@ public class Generate {
 			triangles.add(new Triangle(newTri));
 		}
 		
-		Triangle.calculateColors(triangles);
 		return triangles;
 	}
 	
@@ -198,5 +211,95 @@ public class Generate {
 		baseTriangle.add(new Point(0,Canvas.DRAWING_SIZE));
 		baseTriangle.add(new Point(Canvas.DRAWING_SIZE*2,Canvas.DRAWING_SIZE));
 		return new Triangle(baseTriangle);
+	}
+	
+	/**
+	 * writes the red, green, and blue image data to the respective arrays.
+	 * 
+	 */
+	public static void imageData() {
+		try {
+			BufferedImage image = ImageIO.read(new File(path));
+			
+			final byte[] pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+		    final int width = image.getWidth();
+		    final int height = image.getHeight();
+		    final boolean hasAlphaChannel = image.getAlphaRaster() != null;
+		    rPixels = new int[width][height];
+		    gPixels = new int[width][height];
+		    bPixels = new int[width][height];
+
+		    if (hasAlphaChannel) {
+		    	final int pixelLength = 4;
+		        for (int pixel = 0, row = 0, col = 0; pixel + 3 < pixels.length; pixel += pixelLength) {
+		        	rPixels[row][col] = ((int) pixels[pixel + 3] & 0xff); // red
+		        	gPixels[row][col] = ((int) pixels[pixel + 2] & 0xff); // green
+		            bPixels[row][col] = ((int) pixels[pixel + 1] & 0xff); // blue
+		            
+		            row++;
+		            if (row == height) {
+		            	row=0;
+		            	col++;
+		            }
+		         }
+		      } 
+		      else {
+		    	  final int pixelLength = 3;
+		         for (int pixel = 0, row = 0, col = 0; pixel + 2 < pixels.length; pixel += pixelLength) {
+		        	 rPixels[row][col] = ((int) pixels[pixel + 2] & 0xff); // red
+		        	 gPixels[row][col] = ((int) pixels[pixel + 1] & 0xff); // green
+		        	 bPixels[row][col] = ((int) pixels[pixel + 0] & 0xff); // blue
+		        	 
+		        	 row++;
+		        	 if (row == height) {
+		        		 row=0;
+		        		 col++;
+		        	 }
+		         }
+		      }
+		} catch (Exception e) {
+			System.out.println("Image Loading Exception: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Returns a int array containing the pixel colours for the red, green and blue values.
+	 * 
+	 * @param x the x position on the image
+	 * @param y	the y position on the image
+	 * 
+	 * @return the red, green, blue as an array of ints in that order
+	 */
+	public static int[] pixelColor(int x, int y) {
+		if (rPixels==null) {
+			Generate.imageData();
+		}
+		
+		return new int[] {rPixels[x][y],gPixels[x][y],bPixels[x][y]};
+	}
+	
+	/**
+	 * Sets the path field and reconstructs the image data
+	 * 
+	 * @param pathName the path that the new image is stored at
+	 */
+	public static void setNewImage(String pathName) {
+		try {
+			new File(pathName);
+			path = pathName;
+			imageData();
+		} catch(Exception e) {
+			System.out.println("The path is not valid");
+		}
+		
+	}
+	
+	/**
+	 * Returns the file that the path directs to
+	 * 
+	 * @return the file the path field directs to
+	 */
+	public static File getFile() {
+		return new File(path);
 	}
 }
